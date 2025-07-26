@@ -1,0 +1,55 @@
+name: IaC Scan
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkov-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # Required to upload SARIF results
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install CDK and dependencies
+        run: |
+          npm install -g aws-cdk
+          cd infrastructure
+          npm install
+
+      - name: Synthesize CDK to CloudFormation
+        run: |
+          cd infra
+          cdk synth InfraStack > template.yaml # Synthesize a single stack for demo
+        env:
+          # Provide dummy values for environment variables if your CDK app requires them
+          # for synthesis, as actual AWS credentials are not needed for synth.
+          CDK_DEFAULT_ACCOUNT: '123456789012'
+          CDK_DEFAULT_REGION: 'us-east-1'
+
+      - name: Run Checkov scan
+        uses: bridgecrewio/checkov-action@v12
+        with:
+          directory: . # Scan the current directory where template.yaml is
+          framework: cloudformation
+          output_format: sarif # For GitHub Security tab integration
+          output_file_path: checkov_results.sarif
+          # Optional: specify a config file or skip policies
+          # config_file: .checkov.yaml
+          # skip_check: CKV_AWS_1,CKV_AWS_2
+
+      - name: Upload SARIF file to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: checkov_results.sarif
+        if: always() # Upload results even if Checkov fails
