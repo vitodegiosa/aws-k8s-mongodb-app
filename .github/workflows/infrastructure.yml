@@ -2,14 +2,10 @@ name: Deploy CDK Infrastructure
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'infra/**'
   push:
     paths:
       - 'infra/**'
+      - '.github/workflows/infrastructure.yaml'
     branches:
       - main
 
@@ -26,7 +22,6 @@ jobs:
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
-      CDK_STACKS: "*"  # Change this to specific stacks if needed
 
     steps:
       - name: Checkout code
@@ -46,10 +41,10 @@ jobs:
       - name: Install CDK and dependencies
         run: |
           npm install -g aws-cdk
-          cd infrastructure
+          cd infra
           npm install
 
       - name: Run CDK Deploy
         run: |
-          cd infrastructure
+          cd infra
           cdk deploy InfraStack --require-approval never
