@@ -56,15 +56,12 @@ export class GithubActionsOIDCStack extends Stack {
       assumedBy: new WebIdentityPrincipal(githubProvider.openIdConnectProviderArn, conditions),
       inlinePolicies: props.roleConfig.inlinePolicies,
       managedPolicies: props.roleConfig.managedPolicies,
-      roleName: 'GitHubActionsOidcAccessRole',
       description: 'This role is used via GitHub Actions assume the role in the target AWS account',
       maxSessionDuration: Duration.hours(12),
     });
 
     //Create ECR Repository
-    const repo = new Repository(this, 'SampleAppRepo', {
-      repositoryName: 'sample-app-repo',
-    });
+    const repo = new Repository(this, 'SampleAppRepo');
 
     new CfnOutput(this, 'GitHubActionsOidcAccessRoleArn', {
       value: role.roleArn,

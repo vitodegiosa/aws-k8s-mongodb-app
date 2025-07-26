@@ -1,0 +1,55 @@
+name: Deploy CDK Infrastructure
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infra/**'
+  push:
+    paths:
+      - 'infra/**'
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: CDK Deploy
+    runs-on: ubuntu-latest
+    environment: Prod
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+      CDK_STACKS: "*"  # Change this to specific stacks if needed
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/GitHubActionsOidcAccessRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install CDK and dependencies
+        run: |
+          npm install -g aws-cdk
+          cd infrastructure
+          npm install
+
+      - name: Run CDK Deploy
+        run: |
+          cd infrastructure
+          cdk deploy InfraStack --require-approval never
