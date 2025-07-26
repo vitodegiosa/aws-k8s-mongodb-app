@@ -6,6 +6,12 @@ on:
       - main
     paths:
       - 'infra/**'
+  push:
+    paths:
+      - 'infra/**'
+      - '.github/workflows/infrastructure.yaml'
+    branches:
+      - main
 
 jobs:
   checkov-scan:
@@ -26,7 +32,7 @@ jobs:
       - name: Install CDK and dependencies
         run: |
           npm install -g aws-cdk
-          cd infrastructure
+          cd infra
           npm install
 
       - name: Synthesize CDK to CloudFormation
