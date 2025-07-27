@@ -160,7 +160,7 @@ export class MongoDbInstanceWithBackup extends Construct {
       let documentContentJson = JSON.parse(automationFileContent);
       
       this.ssmDocument = new CfnDocument(this, 'MongoDBBackupSSMDoc', {
-        name: `MongoDB-S3-Backup-Document-${cdk.Aws.STACK_ID}`,
+        name: `MongoDB-S3-Backup-Document-${cdk.Aws.STACK_NAME}`,
         content: documentContentJson,
         documentType: 'Automation',
         documentFormat: 'JSON',
