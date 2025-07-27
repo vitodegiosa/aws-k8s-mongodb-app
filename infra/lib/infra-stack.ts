@@ -55,16 +55,12 @@ export class InfraStack extends cdk.Stack {
       chart: 'secrets-store-csi-driver',
       release: 'csi-secrets-store', // Helm release name
       repository: 'https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts',
-      namespace: 'kube-system', // Driver and provider typically live in kube-system
-      //version: '1.4.0', // IMPORTANT: Specify a compatible version. Check latest stable.
+      namespace: 'kube-system',
       wait: true, // Wait for the chart to be deployed
       values: {
         syncSecret: {
-          enabled: true, // Enable syncing secrets to native Kubernetes Secrets
-        },
-        enableSecretRotation: true, // Enable webhook for secret rotation
-        // Add other values as needed, refer to the Helm chart's values.yaml
-        // e.g., replicaCount, resources, nodeSelector, tolerations
+          enabled: true // Enable syncing secrets to native Kubernetes Secrets
+        }
       },
     });
 
@@ -74,19 +70,19 @@ export class InfraStack extends cdk.Stack {
       release: 'secrets-store-csi-driver-provider-aws', // Helm release name
       repository: 'https://aws.github.io/secrets-store-csi-driver-provider-aws',
       namespace: 'kube-system',
-      //version: '0.3.9', // IMPORTANT: Specify a compatible version. Check latest stable.
       wait: true,
       values: {
         rotationPollInterval: '30s', // How often to check Secrets Manager for updates
-        // Add other values as needed, refer to the Helm chart's values.yaml
-        // e.g., replicaCount, resources
+        serviceAccount: {
+          create: false
+        }
       },
     });
     awsProviderChart.node.addDependency(csiDriverChart);
 
     const appServiceAccount = cluster.addServiceAccount('SampleAppServiceAccount', {
       name: 'sample-app-sa',
-      namespace: 'default', // Or your application's namespace
+      namespace: 'default'
     });
 
     // Grant Cluster admin permissions to the application pod via service account
