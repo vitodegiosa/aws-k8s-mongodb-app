@@ -65,7 +65,7 @@ export class InfraStack extends cdk.Stack {
     });
 
     // Helm chart for the AWS specific provider
-    const awsProviderChart = cluster.addHelmChart('AwsSecretsProvider', {
+    /*const awsProviderChart = cluster.addHelmChart('AwsSecretsProvider', {
       chart: 'secrets-store-csi-driver-provider-aws',
       release: 'secrets-store-csi-driver-provider-aws', // Helm release name
       repository: 'https://aws.github.io/secrets-store-csi-driver-provider-aws',
@@ -78,7 +78,7 @@ export class InfraStack extends cdk.Stack {
         }
       },
     });
-    awsProviderChart.node.addDependency(csiDriverChart);
+    awsProviderChart.node.addDependency(csiDriverChart);*/
 
     const appServiceAccount = cluster.addServiceAccount('SampleAppServiceAccount', {
       name: 'sample-app-sa',
