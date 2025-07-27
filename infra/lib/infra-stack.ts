@@ -78,7 +78,7 @@ export class InfraStack extends cdk.Stack {
         }
       },
     });
-    awsProviderChart.node.addDependency(csiDriverChart);*/
+    awsProviderChart.node.addDependency(csiDriverChart);
 
     const appServiceAccount = cluster.addServiceAccount('SampleAppServiceAccount', {
       name: 'sample-app-sa',
@@ -127,7 +127,7 @@ export class InfraStack extends cdk.Stack {
         ],
       },
     });
-    secretProviderClassManifest.node.addDependency(appServiceAccount);
+    secretProviderClassManifest.node.addDependency(appServiceAccount);*/
 
     const mongoService = {
       apiVersion: "v1",
