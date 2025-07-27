@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "0.3",
+  "description": "*Replace this default text with instructions or other information about your runbook.*\n\n---\n# What is Markdown?\nMarkdown is a lightweight markup language that converts your content with plain text formatting to structurally valid rich text.\n## You can add headings\nYou can add *italics* or make the font **bold**.\n1. Create numbered lists\n* Add bullet points\n>Indent `code samples`\n\nYou can create a [link to another webpage](https://aws.amazon.com).",
+  "parameters": {
+    "Region": {
+      "type": "String",
+      "description": "AWS Region where the EC2 instance is deployed"
+    },
+    "S3BucketName": {
+      "type": "String",
+      "description": "Name of the S3 Bucket where to store backups"
+    },
+    "AutomationAssumeRole": {
+      "type": "String",
+      "default": "",
+      "description": "The IAM Role to assume"
+    },
+    "InstanceId": {
+      "type": "String",
+      "description": "The ID of the EC2 instance hosting MongoDB"
+    }
+  },
+  "mainSteps": [
+    {
+      "description": "Performs MongoDB dump on EC2 and uploads to S3",
+      "name": "RunCommandOnInstances",
+      "action": "aws:runCommand",
+      "isEnd": true,
+      "inputs": {
+        "DocumentName": "AWS-RunShellScript",
+        "Parameters": {
+          "commands": [
+            "set -e",
+            "export AWS_DEFAULT_REGION={{ Region }}",
+            "MONGO_CREDENTIALS=$(aws secretsmanager get-secret-value --secret-id mongodb/credentials --query SecretString --output text)",
+            "MONGO_USERNAME=$(echo $MONGO_CREDENTIALS | jq -r .username)",
+            "MONGO_PASSWORD=$(echo $MONGO_CREDENTIALS | jq -r .password)",
+            "DATE=$(date +%F-%H-%M-%S)",
+            "BACKUP_PATH=\"/tmp/mongodb-backup-$DATE\"",
+            "ARCHIVE_PATH=\"$BACKUP_PATH.tar.gz\"",
+            "mkdir -p \"$BACKUP_PATH\"",
+            "echo \"Dumping MongoDB database ...\"",
+            "mongodump --username $MONGO_USERNAME --password $MONGO_PASSWORD --out \"$BACKUP_PATH\"",
+            "echo \"Compressing backup...\"",
+            "tar -czvf \"$ARCHIVE_PATH\" -C \"$BACKUP_PATH\" .",
+            "echo \"Uploading to S3...\"",
+            "aws s3 cp \"$ARCHIVE_PATH\" \"s3://{{ S3BucketName }}/mongodb-backup-$DATE.tar.gz\"",
+            "echo \"Cleaning up...\"",
+            "rm -rf \"$BACKUP_PATH\" \"$ARCHIVE_PATH\"",
+            "echo \"MongoDB backup completed successfully.\""
+          ]
+        },
+        "InstanceIds": [
+          "{{ InstanceId }}"
+        ]
+      }
+    }
+  ]
+}
