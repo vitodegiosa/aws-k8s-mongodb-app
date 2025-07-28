@@ -42,13 +42,23 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.sha }}
         run: |
           cd application
-          docker build --platform linux/amd64 -t $ECR_REGISTRY/${{ env.ECR_REPO_NAME }}:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/${{ env.ECR_REPO_NAME }}:$IMAGE_TAG
+          docker build --platform linux/amd64 -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} .
+          
+      - name: Run Trivy scan on locally built image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} # Scan the locally built image
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH' # Only report critical and high vulnerabilities
+          ignore-unfixed: true # Only report fixed vulnerabilities
+          vuln-type: 'os,library' # Scan for OS and library vulnerabilities
+          
+      - name: Push Docker image to ECR
+        run: |
+          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }}
 
       - name: Update kubeconfig for EKS
         run: |
