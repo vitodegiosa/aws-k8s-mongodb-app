@@ -124,7 +124,7 @@ export class InfraStack extends cdk.Stack {
         ],
       },
     });
-    secretProviderClassManifest.node.addDependency(appServiceAccount);*/
+    secretProviderClassManifest.node.addDependency(appServiceAccount);
 
     const mongoService = {
       apiVersion: "v1",
