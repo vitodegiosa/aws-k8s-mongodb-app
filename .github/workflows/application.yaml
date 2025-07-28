@@ -1,0 +1,61 @@
+name: Build and Deploy to EKS
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'application/**'
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    name: Build and Deploy Docker Image
+    runs-on: ubuntu-latest
+    environment: Test
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      AWS_REGION: ${{ secrets.AWS_REGION }}
+      AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
+      ECR_REPO_NAME: sample-app-repo
+      CLUSTER_NAME: EksClusterDDABC46F-EDU7q96bg8sU
+      DEPLOYMENT_NAME: sample-app
+      CONTAINER_NAME: sample-app
+      K8S_NAMESPACE: default
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/GitHubActionsOidcAccessRole
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Docker image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd application
+          docker build --platform linux/amd64 -t $ECR_REGISTRY/${{ env.ECR_REPO_NAME }}:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/${{ env.ECR_REPO_NAME }}:$IMAGE_TAG
+
+      - name: Update kubeconfig for EKS
+        run: |
+          aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+
+      - name: Deploy to EKS
+        run: |
+          kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
+            ${{ env.CONTAINER_NAME }}=$ECR_REGISTRY/${{ env.ECR_REPO_NAME }}:$IMAGE_TAG \
+            -n $K8S_NAMESPACE
