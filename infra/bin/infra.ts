@@ -23,7 +23,7 @@ const githubActions = new GithubActionsOIDCStack(app, 'GithubActionsOIDCStack', 
         EcrPolicy: new PolicyDocument({
             statements:[new PolicyStatement({
                 actions: ['ecr:*'],
-                resources: [`arn:aws:ecr:${env.region}:${env.account}:*`]
+                resources: [`*`]
             })]
         }),
         EKSPolicy: new PolicyDocument({
