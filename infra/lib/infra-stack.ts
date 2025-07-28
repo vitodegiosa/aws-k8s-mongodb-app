@@ -172,7 +172,7 @@ export class InfraStack extends cdk.Stack {
         template: {
           metadata: { labels: appLabels },
           spec: {
-            serviceAccountName: appServiceAccount,
+            serviceAccountName: appServiceAccount.serviceAccountName,
             containers: [
               {
                 name: 'sample-app',
