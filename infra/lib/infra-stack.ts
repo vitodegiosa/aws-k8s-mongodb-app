@@ -37,7 +37,7 @@ export class InfraStack extends cdk.Stack {
       }
     });
 
-    const cluster = new Cluster(this, 'EksClusterV2', {
+    const cluster = new Cluster(this, 'EksCluster', {
       version: KubernetesVersion.V1_32,
       vpc,
       vpcSubnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
@@ -48,7 +48,7 @@ export class InfraStack extends cdk.Stack {
     });
     mongoDBInstance.securityGroup.addIngressRule(Peer.securityGroupId(cluster.clusterSecurityGroupId), Port.tcp(27017), 'MongoDB from EKS Nodes');
 
-    /*const csiDriverChart = cluster.addHelmChart('SecretsStoreCsiDriver', {
+    const csiDriverChart = cluster.addHelmChart('SecretsStoreCsiDriver', {
       chart: 'secrets-store-csi-driver',
       release: 'csi-secrets-store', // Helm release name
       repository: 'https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts',
@@ -59,17 +59,18 @@ export class InfraStack extends cdk.Stack {
           enabled: true // Enable syncing secrets to native Kubernetes Secrets
         }
       },
-    });*/
+    });
 
     // Helm chart for the AWS specific provider
     const awsProviderChart = cluster.addHelmChart('AwsSecretsProvider', {
       chart: 'secrets-store-csi-driver-provider-aws',
-      release: 'secrets-provider-aws', // Helm release name
+      release: 'secrets-store-csi-driver-provider-aws', // Helm release name
       repository: 'https://aws.github.io/secrets-store-csi-driver-provider-aws',
       namespace: 'kube-system',
+      version: '1.0.1',
       wait: true,
       values: {
-        rotationPollInterval: '30s' // How often to check Secrets Manager for updates
+        rotationPollInterval: '30s', // How often to check Secrets Manager for updates
       }
     });
     //awsProviderChart.node.addDependency(csiDriverChart);
@@ -204,7 +205,7 @@ export class InfraStack extends cdk.Stack {
                   },
                   {
                     name: 'SECRET_KEY',
-                    value: `secret123`
+                    value: `secret123` // This should also live in secrets manager
                   },
                 ],
                 volumeMounts: [{
