@@ -72,7 +72,13 @@ export class InfraStack extends cdk.Stack {
       namespace: 'kube-system',
       wait: true,
       values: {
-        rotationPollInterval: '30s' // How often to check Secrets Manager for updates
+        rotationPollInterval: '30s', // How often to check Secrets Manager for updates
+        serviceAccount: {
+          create: false,
+          // Explicitly specify the name of the ServiceAccount created by the base CSI driver
+          // to ensure the provider uses the existing one without ownership conflicts.
+          name: 'secrets-store-csi-driver',
+        }
       }
     });
     awsProviderChart.node.addDependency(csiDriverChart);
