@@ -37,17 +37,14 @@ export class InfraStack extends cdk.Stack {
       }
     });
 
-    const cluster = new Cluster(this, 'EksCluster', {
+    const cluster = new Cluster(this, 'EksClusterV2', {
       version: KubernetesVersion.V1_32,
       vpc,
       vpcSubnets: [{ subnetType: SubnetType.PRIVATE_WITH_EGRESS }],
       defaultCapacityType: DefaultCapacityType.AUTOMODE, // default value
       kubectlProviderOptions: {
         kubectlLayer: new KubectlV32Layer(this, 'kubectl'),
-      }/*,
-      albController: {
-        version: eksv2.AlbControllerVersion.V2_8_2
-      }*/
+      }
     });
     mongoDBInstance.securityGroup.addIngressRule(Peer.securityGroupId(cluster.clusterSecurityGroupId), Port.tcp(27017), 'MongoDB from EKS Nodes');
 
