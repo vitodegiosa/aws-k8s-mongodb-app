@@ -22,7 +22,7 @@ jobs:
       AWS_REGION: ${{ secrets.AWS_REGION }}
       AWS_ACCOUNT: ${{ secrets.AWS_ACCOUNT }}
       ECR_REPO_NAME: githubactionsoidcstack-sampleapprepod40c970d-lkhwlwklf0xw
-      CLUSTER_NAME: EksClusterDDABC46F-EDU7q96bg8sU
+      CLUSTER_NAME: ${{ vars.EKS_CLUSTER_NAME }}
       DEPLOYMENT_NAME: sample-app
       CONTAINER_NAME: sample-app
       K8S_NAMESPACE: default
