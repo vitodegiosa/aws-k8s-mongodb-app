@@ -65,18 +65,15 @@ export class InfraStack extends cdk.Stack {
     });
 
     // Helm chart for the AWS specific provider
-    /*const awsProviderChart = cluster.addHelmChart('AwsSecretsProvider', {
+    const awsProviderChart = cluster.addHelmChart('AwsSecretsProvider', {
       chart: 'secrets-store-csi-driver-provider-aws',
-      release: 'secrets-store-csi-driver-provider-aws', // Helm release name
+      release: 'secrets-provider-aws', // Helm release name
       repository: 'https://aws.github.io/secrets-store-csi-driver-provider-aws',
       namespace: 'kube-system',
       wait: true,
       values: {
-        rotationPollInterval: '30s', // How often to check Secrets Manager for updates
-        serviceAccount: {
-          create: false
-        }
-      },
+        rotationPollInterval: '30s' // How often to check Secrets Manager for updates
+      }
     });
     awsProviderChart.node.addDependency(csiDriverChart);
 
