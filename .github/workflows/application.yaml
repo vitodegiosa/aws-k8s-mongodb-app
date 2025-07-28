@@ -67,5 +67,5 @@ jobs:
       - name: Deploy to EKS
         run: |
           kubectl set image deployment/${{ env.DEPLOYMENT_NAME }} \
-            ${{ env.CONTAINER_NAME }}=$ECR_REGISTRY/${{ env.ECR_REPO_NAME }}:$IMAGE_TAG \
-            -n $K8S_NAMESPACE
+            ${{ env.CONTAINER_NAME }}=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} \
+            -n ${{ env.K8S_NAMESPACE }}
