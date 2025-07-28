@@ -51,7 +51,7 @@ export class InfraStack extends cdk.Stack {
     });
     mongoDBInstance.securityGroup.addIngressRule(Peer.securityGroupId(cluster.clusterSecurityGroupId), Port.tcp(27017), 'MongoDB from EKS Nodes');
 
-    const csiDriverChart = cluster.addHelmChart('SecretsStoreCsiDriver', {
+    /*const csiDriverChart = cluster.addHelmChart('SecretsStoreCsiDriver', {
       chart: 'secrets-store-csi-driver',
       release: 'csi-secrets-store', // Helm release name
       repository: 'https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts',
@@ -62,7 +62,7 @@ export class InfraStack extends cdk.Stack {
           enabled: true // Enable syncing secrets to native Kubernetes Secrets
         }
       },
-    });
+    });*/
 
     // Helm chart for the AWS specific provider
     const awsProviderChart = cluster.addHelmChart('AwsSecretsProvider', {
@@ -72,13 +72,10 @@ export class InfraStack extends cdk.Stack {
       namespace: 'kube-system',
       wait: true,
       values: {
-        rotationPollInterval: '30s', // How often to check Secrets Manager for updates
-        serviceAccount: {
-          create: true
-        }
+        rotationPollInterval: '30s' // How often to check Secrets Manager for updates
       }
     });
-    awsProviderChart.node.addDependency(csiDriverChart);
+    //awsProviderChart.node.addDependency(csiDriverChart);
 
     const appServiceAccount = cluster.addServiceAccount('SampleAppServiceAccount', {
       name: 'sample-app-sa',
