@@ -2,12 +2,16 @@ import * as cdk from 'aws-cdk-lib';
 import { InstanceClass, InstanceSize, InstanceType, MachineImage, Peer, Port, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { KubectlV32Layer } from '@aws-cdk/lambda-layer-kubectl-v32';
-import { Cluster, DefaultCapacityType, KubernetesVersion } from '@aws-cdk/aws-eks-v2-alpha';
+import { AccessEntry, AccessEntryType, AccessPolicy, AccessScopeType, Cluster, DefaultCapacityType, KubernetesVersion } from '@aws-cdk/aws-eks-v2-alpha';
 import { MongoDbInstanceWithBackup } from './mongodb-instance';
-import { ManagedPolicy } from 'aws-cdk-lib/aws-iam';
+import { ManagedPolicy, Role } from 'aws-cdk-lib/aws-iam';
+
+export interface InfraStackProps extends cdk.StackProps {
+  githubActionsRole: Role
+}
 
 export class InfraStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: InfraStackProps) {
     super(scope, id, props);
 
     // VPC with public and private subnets
@@ -283,6 +287,18 @@ export class InfraStack extends cdk.Stack {
     cluster.addManifest('AppService', service);
     cluster.addManifest('AppIngress', ingress);
 
+    //Give Github Actions access to perform deployment by updating the container image
+    const accessEntry = new AccessEntry(this, 'GitHubActionsEksAccessEntry', {
+      cluster: cluster,
+      principal: props.githubActionsRole.roleArn,
+      accessEntryType: AccessEntryType.STANDARD,
+      //kubernetesGroups: [k8sAccessGroupName], // This is the Kubernetes group name
+      // You can also attach EKS-managed access policies directly here if they fit your needs
+      accessPolicies: [
+        AccessPolicy.fromAccessPolicyName('AmazonEKSAdminPolicy', { accessScopeType: AccessScopeType.CLUSTER}),
+        AccessPolicy.fromAccessPolicyName('AmazonEKSClusterAdminPolicy', { accessScopeType: AccessScopeType.CLUSTER})
+      ]
+    });
 
     // Output the EC2 instance public IP for easy access
     new cdk.CfnOutput(this, 'MongoDBInstancePrivateIp', {

@@ -30,8 +30,11 @@ jobs:
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/GithubActionsOIDCStack-GitHubActionsOidcAccessRole0-FxLkwmuq1uSp
+          role-to-assume: arn:aws:iam::${{ env.AWS_ACCOUNT }}:role/$AWS_OIDC_ASSUMED_ROLE
           aws-region: ${{ env.AWS_REGION }}
+
+      - name: Check identity
+        run: aws sts get-caller-identity
 
       - name: Setup Node.js
         uses: actions/setup-node@v4

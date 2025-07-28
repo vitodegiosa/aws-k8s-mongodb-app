@@ -33,6 +33,9 @@ export interface GithubActionsOIDCStackProps extends StackProps {
 }
 
 export class GithubActionsOIDCStack extends Stack {
+  
+  public readonly role: Role;
+  
   constructor(scope: Construct, id: string, props: GithubActionsOIDCStackProps) {
     super(scope, id, props);
 
@@ -52,7 +55,8 @@ export class GithubActionsOIDCStack extends Stack {
       },
     };
 
-    const role = new Role(this, 'GitHubActionsOidcAccessRole', {
+    this.role = new Role(this, 'GitHubActionsOidcAccessRole', {
+      roleName: 'GitHubActionsOidcAccessRole',
       assumedBy: new WebIdentityPrincipal(githubProvider.openIdConnectProviderArn, conditions),
       inlinePolicies: props.roleConfig.inlinePolicies,
       managedPolicies: props.roleConfig.managedPolicies,
@@ -64,7 +68,7 @@ export class GithubActionsOIDCStack extends Stack {
     const repo = new Repository(this, 'SampleAppRepo');
 
     new CfnOutput(this, 'GitHubActionsOidcAccessRoleArn', {
-      value: role.roleArn,
+      value: this.role.roleArn,
       description: `Arn for AWS IAM role with Github Actions OIDC auth for ${iamRepoDeployAccess}`,
       exportName: 'GitHubActionsOidcAccessRoleArn',
     });

@@ -6,7 +6,7 @@ import { InfraStack } from '../lib/infra-stack';
 
 const app = new cdk.App();
 const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION };
-new GithubActionsOIDCStack(app, 'GithubActionsOIDCStack', {
+const githubActions = new GithubActionsOIDCStack(app, 'GithubActionsOIDCStack', {
     env,
     repositoryConfig: {
       owner: 'vitodegiosa',
@@ -25,6 +25,14 @@ new GithubActionsOIDCStack(app, 'GithubActionsOIDCStack', {
                 actions: ['ecr:*'],
                 resources: [`arn:aws:ecr:${env.region}:${env.account}:*`]
             })]
+        }),
+        EKSPolicy: new PolicyDocument({
+            statements:[
+              new PolicyStatement({
+                actions: ['eks:DescribeCluster', 'eks:ListClusters'],
+                resources: [`*`]
+              })
+            ]
         })
       },
     },
@@ -43,4 +51,5 @@ new InfraStack(app, 'InfraStack', {
   // env: { account: '123456789012', region: 'us-east-1' },
 
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+  githubActionsRole: githubActions.role
 });
