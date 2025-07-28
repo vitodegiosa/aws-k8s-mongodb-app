@@ -159,6 +159,130 @@ export class InfraStack extends cdk.Stack {
     }
     cluster.addManifest('AppIngressClass', ingressClass);
 
+    const appLabels = { app: 'sample-app' };
+
+    // Kubernetes Deployment
+    const deployment = {
+      apiVersion: 'apps/v1',
+      kind: 'Deployment',
+      metadata: { name: 'sample-app' },
+      spec: {
+        replicas: 1,
+        selector: { matchLabels: appLabels },
+        template: {
+          metadata: { labels: appLabels },
+          spec: {
+            serviceAccountName: appServiceAccount,
+            containers: [
+              {
+                name: 'sample-app',
+                image: '242201275059.dkr.ecr.us-east-1.amazonaws.com/githubactionsoidcstack-sampleapprepod40c970d-lkhwlwklf0xw:initial',
+                ports: [{ containerPort: 8080 }],
+                env: [
+                  // Retrieve individual components from the synced Kubernetes Secret
+                  {
+                    name: 'MONGODB_USERNAME',
+                    valueFrom: {
+                      secretKeyRef: {
+                        name: 'mongodb-individual-components-synced', // Reference the synced K8s Secret
+                        key: 'username',
+                      },
+                    },
+                  },
+                  {
+                    name: 'MONGODB_PASSWORD',
+                    valueFrom: {
+                      secretKeyRef: {
+                        name: 'mongodb-individual-components-synced',
+                        key: 'password',
+                      },
+                    },
+                  },
+                  {
+                    name: 'MONGODB_HOST',
+                    value: 'mongodb-external.default.svc.cluster.local:27017/?authSource=admin'
+                  },
+                  {
+                    name: 'SECRET_KEY',
+                    value: `secret123`
+                  },
+                ],
+                volumeMounts: [{
+                  name: 'secrets-store-inline',
+                  mountPath: '/mnt/secrets-store',
+                  readOnly: true,
+                }],
+              },
+            ],
+            volumes: [{
+              name: 'secrets-store-inline',
+              csi: {
+                driver: 'secrets-store.csi.k8s.io',
+                readOnly: true,
+                volumeAttributes: {
+                  secretProviderClass: 'mongodb-secretprovider',
+                },
+              },
+            }]
+          },
+        },
+      },
+    };
+
+    // Kubernetes Service (NodePort for ALB)
+    const service = {
+      apiVersion: 'v1',
+      kind: 'Service',
+      metadata: { name: 'sample-app-service' },
+      spec: {
+        selector: appLabels,
+        ports: [{ port: 80, targetPort: 8080 }],
+        type: 'NodePort',
+      },
+    };
+
+    const ingress = {
+      apiVersion: 'networking.k8s.io/v1',
+      kind: 'Ingress',
+      metadata: {
+        name: 'sample-app-ingress',
+        annotations: {
+          //'kubernetes.io/ingress.class': 'alb',
+          'alb.ingress.kubernetes.io/scheme': 'internet-facing',
+          'alb.ingress.kubernetes.io/target-type': 'ip',
+          //'alb.ingress.kubernetes.io/listen-ports': '[{"HTTP": 80}]',
+        },
+      },
+      spec: {
+        ingressClassName: 'alb',
+        rules: [
+          {
+            http: {
+              paths: [
+                {
+                  path: '/',
+                  pathType: 'Prefix',
+                  backend: {
+                    service: {
+                      name: 'sample-app-service',
+                      port: { number: 80 },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        ],
+      },
+    };
+
+    // Add resources to the cluster
+    //cluster.addManifest('AppIngressClass', ingressClass);
+    cluster.addManifest('AppDeployment', deployment);
+    cluster.addManifest('AppService', service);
+    cluster.addManifest('AppIngress', ingress);
+
+
     // Output the EC2 instance public IP for easy access
     new cdk.CfnOutput(this, 'MongoDBInstancePrivateIp', {
       value: mongoDBInstance.instance.instancePrivateIp,
