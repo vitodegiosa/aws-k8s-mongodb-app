@@ -12,7 +12,7 @@ jobs:
   build-and-deploy:
     name: Build and Deploy Docker Image
     runs-on: ubuntu-latest
-    environment: Test
+    environment: Prod
 
     permissions:
       id-token: write
