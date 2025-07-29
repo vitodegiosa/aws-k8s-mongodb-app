@@ -55,6 +55,12 @@ jobs:
           severity: 'CRITICAL,HIGH' # Only report critical and high vulnerabilities
           ignore-unfixed: true # Only report fixed vulnerabilities
           vuln-type: 'os,library' # Scan for OS and library vulnerabilities
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+        if: always() # Upload results even if Trivy finds vulnerabilities
           
       - name: Push Docker image to ECR
         run: |
