@@ -40,7 +40,7 @@ jobs:
       - name: Synthesize CDK to CloudFormation
         run: |
           cd infra
-          cdk synth InfraStack > template.yaml # Synthesize a single stack for demo
+          cdk synth --output cdk.out
         env:
           # Provide dummy values for environment variables if your CDK app requires them
           # for synthesis, as actual AWS credentials are not needed for synth.
