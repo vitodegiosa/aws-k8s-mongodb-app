@@ -1,0 +1,46 @@
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'application/**'
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'application/**'
+
+jobs:
+  trivy-scan:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      security-events: write # Required to upload SARIF results
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          cd application
+          docker build -t sample-app:latest .
+
+      - name: Run Trivy scan on locally built image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: sample-app:latest # Scan the locally built image
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH' # Only report critical and high vulnerabilities
+          ignore-unfixed: true # Only report fixed vulnerabilities
+          vuln-type: 'os,library' # Scan for OS and library vulnerabilities
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+        if: always() # Upload results even if Trivy finds vulnerabilities
