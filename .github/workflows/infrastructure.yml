@@ -10,7 +10,7 @@ on:
       - main
 
 jobs:
-  deploy:
+  cdk-deploy:
     name: CDK Deploy
     runs-on: ubuntu-latest
     environment: Prod

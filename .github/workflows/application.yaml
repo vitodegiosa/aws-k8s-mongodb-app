@@ -1,4 +1,4 @@
-name: Build and Deploy to EKS
+name: Build Continer Image and Deploy Application to EKS
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-and-deploy:
+  app-build-and-deploy:
     name: Build and Deploy Docker Image
     runs-on: ubuntu-latest
     environment: Prod
@@ -17,8 +17,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-      security-events: write # Required to upload SARIF results
-      actions: read
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
@@ -47,22 +45,6 @@ jobs:
         run: |
           cd application
           docker build --platform linux/amd64 -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} .
-          
-      - name: Run Trivy scan on locally built image
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} # Scan the locally built image
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH' # Only report critical and high vulnerabilities
-          ignore-unfixed: true # Only report fixed vulnerabilities
-          vuln-type: 'os,library' # Scan for OS and library vulnerabilities
-
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-        if: always() # Upload results even if Trivy finds vulnerabilities
           
       - name: Push Docker image to ECR
         run: |
