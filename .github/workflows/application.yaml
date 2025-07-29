@@ -17,6 +17,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      security-events: write # Required to upload SARIF results
+      actions: read
 
     env:
       AWS_REGION: ${{ secrets.AWS_REGION }}
