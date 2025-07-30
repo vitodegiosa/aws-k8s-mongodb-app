@@ -11,6 +11,7 @@ const githubActions = new GithubActionsOIDCStack(app, 'GithubActionsOIDCStack', 
     repositoryConfig: {
       owner: 'vitodegiosa',
       repo: 'aws-k8s-mongodb-app',
+      filter: 'ref:refs/heads/main'
     },
     roleConfig: {
       inlinePolicies: {
