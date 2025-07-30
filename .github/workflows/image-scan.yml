@@ -3,15 +3,11 @@ name: Container Image Scan
 on:
   workflow_dispatch:
   push:
-    paths:
-      - 'application/**'
     branches:
       - main
   pull_request:
     branches:
       - main
-    paths:
-      - 'application/**'
 
 jobs:
   trivy-scan:

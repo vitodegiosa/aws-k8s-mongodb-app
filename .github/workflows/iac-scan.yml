@@ -5,13 +5,7 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'infra/**'
-      - '.github/workflows/infrastructure.yaml'
   push:
-    paths:
-      - 'infra/**'
-      - '.github/workflows/infrastructure.yaml'
     branches:
       - main
 
