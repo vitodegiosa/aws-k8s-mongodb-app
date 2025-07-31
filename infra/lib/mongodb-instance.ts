@@ -88,7 +88,10 @@ export class MongoDbInstanceWithBackup extends Construct {
         ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore')
       ]
     });
-    ec2Role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2FullAccess'));
+    ec2Role.addToPolicy(new PolicyStatement({
+      actions: ['ec2:*'],
+      resources: ['*']
+    }));
 
     //User Data for EC2 Instance to initialize with SSM and MongoDB (+1 year old)
     const initScript = 'userdata.sh';
