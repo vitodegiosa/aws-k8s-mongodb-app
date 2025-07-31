@@ -3,6 +3,7 @@ import * as cdk from 'aws-cdk-lib';
 import { PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { GithubActionsOIDCStack } from '../lib/github-actions-oidc-stack';
 import { InfraStack } from '../lib/infra-stack';
+import { AccountSecurityStack } from '../lib/account-security-stack';
 
 const app = new cdk.App();
 const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION };
@@ -54,3 +55,4 @@ new InfraStack(app, 'InfraStack', {
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
   githubActionsRole: githubActions.role
 });
+new AccountSecurityStack(app, 'AccountSecurityStack', {});
