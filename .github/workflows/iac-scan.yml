@@ -44,7 +44,7 @@ jobs:
       - name: Run Checkov scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: cdk.out # Scan the current directory where template.yaml is
+          directory: infra/cdk.out # Scan the current directory where template.yaml is
           framework: cloudformation
           output_format: sarif # For GitHub Security tab integration
           output_file_path: checkov_results.sarif
