@@ -34,7 +34,7 @@ jobs:
       - name: Synthesize CDK to CloudFormation
         run: |
           cd infra
-          cdk synth --output cdk.out
+          cdk synth
         env:
           # Provide dummy values for environment variables if your CDK app requires them
           # for synthesis, as actual AWS credentials are not needed for synth.
@@ -44,7 +44,7 @@ jobs:
       - name: Run Checkov scan
         uses: bridgecrewio/checkov-action@v12
         with:
-          directory: . # Scan the current directory where template.yaml is
+          directory: cdk.out # Scan the current directory where template.yaml is
           framework: cloudformation
           output_format: sarif # For GitHub Security tab integration
           output_file_path: checkov_results.sarif
