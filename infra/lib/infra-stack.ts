@@ -84,6 +84,27 @@ export class InfraStack extends cdk.Stack {
       namespace: 'default'
     });
 
+    const clusterRoleBinding = {
+      apiVersion: 'rbac.authorization.k8s.io/v1',
+      kind: 'ClusterRoleBinding',
+      metadata: {
+        name: 'sample-app-sa-cluster-admin-binding'
+      },
+      subjects: [
+        {
+          kind: 'ServiceAccount',
+          name: appServiceAccount.serviceAccountName,
+          namespace: appServiceAccount.serviceAccountNamespace
+        }
+      ],
+      roleRef: {
+        kind: 'ClusterRole',
+        name: 'cluster-admin',
+        apiGroup: 'rbac.authorization.k8s.io'
+      }
+    };
+    cluster.addManifest('SampleAppSAClusterRoleBinding', clusterRoleBinding);
+
     // Grant Cluster admin permissions to the application pod via service account
     appServiceAccount.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEKSClusterPolicy'));
     appServiceAccount.role.addManagedPolicy(ManagedPolicy.fromAwsManagedPolicyName('AmazonEKSVPCResourceController'));
