@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { InstanceClass, InstanceSize, InstanceType, MachineImage, Peer, Port, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
+import { GatewayVpcEndpointAwsService, InstanceClass, InstanceSize, InstanceType, MachineImage, Peer, Port, SubnetType, Vpc } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { KubectlV32Layer } from '@aws-cdk/lambda-layer-kubectl-v32';
 import { AccessEntry, AccessEntryType, AccessPolicy, AccessScopeType, Cluster, DefaultCapacityType, KubernetesVersion } from '@aws-cdk/aws-eks-v2-alpha';
@@ -27,6 +27,10 @@ export class InfraStack extends cdk.Stack {
           subnetType: SubnetType.PRIVATE_WITH_EGRESS
         }
       ]
+    });
+
+    const s3GatewayEndpoint = vpc.addGatewayEndpoint('S3GatewayEndpoint', {
+      service: GatewayVpcEndpointAwsService.S3
     });
 
     const mongoDBInstance = new MongoDbInstanceWithBackup(this, "MongoDBInstanceWithBackup", {
