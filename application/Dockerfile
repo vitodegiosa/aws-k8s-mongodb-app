@@ -1,3 +1,7 @@
+FROM alpine AS prebuild
+RUN --mount=type=secret,id=candidate,env=CANDIDATE \
+    echo $CANDIDATE > wizexercise.txt
+
 # Building the binary of the App
 FROM golang:1.19 AS build
 
@@ -14,7 +18,7 @@ COPY --from=build  /go/src/tasky/tasky .
 COPY --from=build  /go/src/tasky/assets ./assets
 
 # Copy wizexercise.txt file
-COPY ./wizexercise.txt .
+COPY --from=prebuild wizexercise.txt .
 
 # Copy the entrypoint script and make it executable
 COPY ./entrypoint.sh .
