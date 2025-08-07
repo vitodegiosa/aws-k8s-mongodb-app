@@ -42,13 +42,24 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Docker image
-        run: |
-          cd application
-          docker build --platform linux/amd64 -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} .
+        uses: docker/build-push-action@v5
+        with:
+          context: ./application
+          file: ./application/Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }}
+          secrets: |
+            "candidate=${{ github.actor }}"
+
+      #- name: Build and push Docker image
+      #  run: |
+      #    cd application
+      #    docker build --platform linux/amd64 -t ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }} .
           
-      - name: Push Docker image to ECR
-        run: |
-          docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }}
+      #- name: Push Docker image to ECR
+      #  run: |
+      #    docker push ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_NAME }}:${{ github.sha }}
 
       - name: Update kubeconfig for EKS
         run: |
