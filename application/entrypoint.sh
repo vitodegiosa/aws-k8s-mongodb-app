@@ -9,9 +9,13 @@ echo "Starting entrypoint.sh for Tasky application..."
 # Check if required environment variables are set
 # These variables will be passed from Kubernetes Deployment
 if [ -z "$MONGODB_USERNAME" ] || [ -z "$MONGODB_PASSWORD" ] || [ -z "$MONGODB_HOST" ]; then
-  echo "Error: One or more required MongoDB environment variables (ONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST) are not set."
+  echo "Error: One or more required MongoDB environment variables (MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_HOST) are not set."
   exit 1
 fi
+
+# ALTERNATIVE
+# MONGODB_USERNAME=$(cat /mnt/secrets-store/username)
+# MONGODB_PASSWORD=$(cat /mnt/secrets-store/password)
 
 # Construct the MONGODB_URI
 MONGODB_URI="mongodb://${MONGODB_USERNAME}:${MONGODB_PASSWORD}@${MONGODB_HOST}"
