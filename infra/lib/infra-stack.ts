@@ -193,7 +193,7 @@ export class InfraStack extends cdk.Stack {
       kind: 'Deployment',
       metadata: { name: 'sample-app' },
       spec: {
-        replicas: 1,
+        replicas: 3,
         selector: { matchLabels: appLabels },
         template: {
           metadata: { labels: appLabels },

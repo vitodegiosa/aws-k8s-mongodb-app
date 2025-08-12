@@ -1,0 +1,65 @@
+{
+  "load-balancer:account=242201275059:loadBalancerTags.0.key=ingress.eks.amazonaws.com/stack:loadBalancerTags.0.value=default/sample-app-ingress:loadBalancerType=application:region=us-east-1": {
+    "loadBalancerArn": "arn:aws:elasticloadbalancing:us-east-1:242201275059:loadbalancer/app/k8s-default-sampleap-82fa4aa5d3/8957cbf34eb0f13b",
+    "loadBalancerCanonicalHostedZoneId": "Z35SXDOTRQ7X7K",
+    "loadBalancerDnsName": "k8s-default-sampleap-82fa4aa5d3-1873919073.us-east-1.elb.amazonaws.com",
+    "vpcId": "vpc-0897eecac797300a2",
+    "securityGroupIds": [
+      "sg-025cdf2d14717c0df",
+      "sg-03a7f6206d3535aac"
+    ],
+    "ipAddressType": "ipv4"
+  },
+  "vpc-provider:account=242201275059:filter.vpc-id=vpc-0897eecac797300a2:region=us-east-1:returnAsymmetricSubnets=true": {
+    "vpcId": "vpc-0897eecac797300a2",
+    "vpcCidrBlock": "10.0.0.0/16",
+    "ownerAccountId": "242201275059",
+    "availabilityZones": [],
+    "subnetGroups": [
+      {
+        "name": "private",
+        "type": "Private",
+        "subnets": [
+          {
+            "subnetId": "subnet-022fbe18921f15206",
+            "cidr": "10.0.128.0/18",
+            "availabilityZone": "us-east-1a",
+            "routeTableId": "rtb-0ceb03d6635bf0de3"
+          },
+          {
+            "subnetId": "subnet-0310c928bf6f0ff2a",
+            "cidr": "10.0.192.0/18",
+            "availabilityZone": "us-east-1b",
+            "routeTableId": "rtb-0163a5f7a33b494ec"
+          }
+        ]
+      },
+      {
+        "name": "public",
+        "type": "Public",
+        "subnets": [
+          {
+            "subnetId": "subnet-0d16fbcc8c63fab51",
+            "cidr": "10.0.0.0/18",
+            "availabilityZone": "us-east-1a",
+            "routeTableId": "rtb-000d9267c972ebb53"
+          },
+          {
+            "subnetId": "subnet-0459da89e31dba6a6",
+            "cidr": "10.0.64.0/18",
+            "availabilityZone": "us-east-1b",
+            "routeTableId": "rtb-0a68ccd16fcba92ca"
+          }
+        ]
+      }
+    ]
+  },
+  "security-group:account=242201275059:region=us-east-1:securityGroupId=sg-025cdf2d14717c0df": {
+    "securityGroupId": "sg-025cdf2d14717c0df",
+    "allowAllOutbound": false
+  },
+  "security-group:account=242201275059:region=us-east-1:securityGroupId=sg-03a7f6206d3535aac": {
+    "securityGroupId": "sg-03a7f6206d3535aac",
+    "allowAllOutbound": false
+  }
+}

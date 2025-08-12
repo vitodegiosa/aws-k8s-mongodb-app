@@ -4,6 +4,7 @@ import { PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { GithubActionsOIDCStack } from '../lib/github-actions-oidc-stack';
 import { InfraStack } from '../lib/infra-stack';
 import { AccountSecurityStack } from '../lib/account-security-stack';
+import { SecurityStack } from '../lib/security-stack';
 
 const app = new cdk.App();
 const env = { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION };
@@ -55,3 +56,4 @@ new InfraStack(app, 'InfraStack', {
   githubActionsRole: githubActions.role
 });
 new AccountSecurityStack(app, 'AccountSecurityStack', {});
+new SecurityStack(app, "SecurityStack", {env});
